@@ -4,6 +4,8 @@ from telegram.ext import ContextTypes
 
 from database.models import User
 from utils.middlewares import with_user
+from api.chat import get_answer
+from api.connect import get_client
 
 
 @with_user
@@ -19,7 +21,11 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     chat.add_user_message(text)
 
-    response_text = "Response text"  # TODO
+    messages = chat.collect_messages()
+
+    client = get_client()
+
+    response_text = get_answer(client, messages)
 
     await update.message.reply_text(response_text)
 

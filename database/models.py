@@ -1,3 +1,4 @@
+from typing import List
 from peewee import (
     Model,
     CharField,
@@ -8,11 +9,11 @@ from peewee import (
     fn,
 )
 from .db import db
-
+from prompts import SYSTEM_PROMPT
 
 ROLE_SYSTEM = "system"
 ROLE_USER = "user"
-ROLE_ASSISTANT = "asisstant"
+ROLE_ASSISTANT = "assistant"
 ROLES = [ROLE_SYSTEM, ROLE_USER, ROLE_ASSISTANT]
 
 
@@ -27,11 +28,14 @@ class User(BaseModel):
     first_name = CharField(null=True)
 
     def get_active_chat(self) -> "Chat":
-        chat = Chat.select().where((Chat.user == self) & (Chat.is_active == True)).first()
-        
+        chat = (
+            Chat.select().where((Chat.user == self) & (Chat.is_active == True)).first()
+        )
+
         if not chat:
             chat = Chat.create(user=self)
-        
+            chat.add_system_message()
+
         return chat
 
 
@@ -50,7 +54,12 @@ class Chat(BaseModel):
 
         return super().save(*args, **kwargs)
 
-    def add_system_message(self, content: str) -> "Message":
+    def inactive(self):
+        self.is_active = False
+        self.save()
+
+    def add_system_message(self) -> "Message":
+        content = SYSTEM_PROMPT
         return Message.create(chat=self, role=ROLE_SYSTEM, content=content)
 
     def add_user_message(self, content: str) -> "Message":
@@ -58,6 +67,17 @@ class Chat(BaseModel):
 
     def add_assistant_message(self, content: str) -> "Message":
         return Message.create(chat=self, role=ROLE_ASSISTANT, content=content)
+
+    def collect_messages(self) -> List[dict]:
+        messages = []
+        query = (
+            Message.select().where(Message.chat == self).order_by(Message.number.asc())
+        )
+
+        for msg in query:
+            messages.append({"role": msg.role, "content": msg.content})
+
+        return messages
 
 
 class Message(BaseModel):

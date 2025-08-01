@@ -13,3 +13,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     await update.message.reply_text(msg)
+
+
+@with_user
+async def new_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user: User = context.user_db
+
+    chat = user.get_active_chat()
+    chat.inactive()
+
+    await update.effective_chat.send_message("Yangi chat yaratildi.")
+    await update.effective_chat.send_message("Menga biror savolingiz bormi?")

@@ -7,3 +7,6 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Database
 DB_NAME = os.getenv("DB_NAME", "bot.db")
+
+# Together
+TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")

@@ -1,0 +1,1 @@
+from .system_prompt import CONTENT as SYSTEM_PROMPT
