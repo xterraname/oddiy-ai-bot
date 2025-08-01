@@ -1,6 +1,8 @@
+import html
 from telegram import Update
 from telegram.constants import ChatType
 from telegram.ext import ContextTypes
+from telegram.constants import ParseMode
 
 from database.models import User
 from utils.middlewares import with_user
@@ -27,6 +29,8 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     response_text = get_answer(client, messages)
 
-    await update.message.reply_text(response_text)
+    await update.message.reply_text(
+        html.escape(response_text), parse_mode=ParseMode.HTML
+    )
 
     chat.add_assistant_message(response_text)
