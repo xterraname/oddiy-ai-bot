@@ -14,7 +14,10 @@ from prompts import SYSTEM_PROMPT
 ROLE_SYSTEM = "system"
 ROLE_USER = "user"
 ROLE_ASSISTANT = "assistant"
-ROLES = [ROLE_SYSTEM, ROLE_USER, ROLE_ASSISTANT]
+ROLE_TOOL = "tool"
+ROLES = [ROLE_SYSTEM, ROLE_USER, ROLE_ASSISTANT, ROLE_TOOL]
+
+MAX_CHAT_COUNT = 20
 
 
 class BaseModel(Model):
@@ -37,6 +40,14 @@ class User(BaseModel):
             chat.add_system_message()
 
         return chat
+
+    @property 
+    def number_chats(self) -> int:
+        return self.chats.count()
+
+    @property
+    def number_chats_left(self) -> int:
+        return max(MAX_CHAT_COUNT - self.number_chats, 0)
 
 
 class Chat(BaseModel):
@@ -67,6 +78,9 @@ class Chat(BaseModel):
 
     def add_assistant_message(self, content: str) -> "Message":
         return Message.create(chat=self, role=ROLE_ASSISTANT, content=content)
+
+    def add_tool_message(self, content: str) -> "Message":
+        return Message.create(chat=self, role=ROLE_TOOL, content=content)
 
     def collect_messages(self) -> List[dict]:
         messages = []
