@@ -34,6 +34,10 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user: User = context.user_db
     chat = user.get_active_chat()
+    
+    if not chat.check_limit_messages():
+        await update.effective_chat.send_message("Bitta chatdagi habar soni cheklangan! Iltimos yangi chat oching.")
+        return
 
     text = update.message.text
     chat.add_user_message(text)

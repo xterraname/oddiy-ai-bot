@@ -18,6 +18,7 @@ ROLE_TOOL = "tool"
 ROLES = [ROLE_SYSTEM, ROLE_USER, ROLE_ASSISTANT, ROLE_TOOL]
 
 MAX_CHAT_COUNT = 20
+MAX_MESSAGE_COUNT = 30
 
 
 class BaseModel(Model):
@@ -41,7 +42,7 @@ class User(BaseModel):
 
         return chat
 
-    @property 
+    @property
     def number_chats(self) -> int:
         return self.chats.count()
 
@@ -92,6 +93,13 @@ class Chat(BaseModel):
             messages.append({"role": msg.role, "content": msg.content})
 
         return messages
+
+    @property
+    def number_messages(self):
+        return self.messages.count()
+    
+    def check_limit_messages(self):
+        return self.number_messages < MAX_MESSAGE_COUNT
 
 
 class Message(BaseModel):

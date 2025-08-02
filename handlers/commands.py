@@ -18,6 +18,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_user
 async def new_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user: User = context.user_db
+    
+    if user.number_chats_left < 1:
+        await update.effective_chat.send_message("Chat bo'yicha limitingiz tugagan!")
+        return
 
     chat = user.get_active_chat()
     chat.inactive()
