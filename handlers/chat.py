@@ -1,5 +1,7 @@
 import html
 import json
+import tempfile
+import requests
 from telegram import Update
 from telegram.constants import ChatType
 from telegram.ext import ContextTypes
@@ -9,6 +11,7 @@ from database.models import User
 from utils.middlewares import with_user
 from api.chat import get_answer
 from api.connect import get_client
+from config import STT_API_URL
 
 
 def ai_func(telegram_id: int, info_type: str):
@@ -17,7 +20,10 @@ def ai_func(telegram_id: int, info_type: str):
         return "User not found"
 
     if info_type == "chat":
-        result = {"number_chats": user.number_chats, "number_chats_left": user.number_chats_left}
+        result = {
+            "number_chats": user.number_chats,
+            "number_chats_left": user.number_chats_left,
+        }
         return json.dumps(result)
     elif info_type == "account":
         result = {"telegram_id": telegram_id, "name": user.first_name}
@@ -34,12 +40,36 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user: User = context.user_db
     chat = user.get_active_chat()
-    
+
     if not chat.check_limit_messages():
-        await update.effective_chat.send_message("Bitta chatdagi habar soni cheklangan! Iltimos yangi chat oching.")
+        await update.effective_chat.send_message(
+            "Bitta chatdagi habar soni cheklangan! Iltimos yangi chat oching."
+        )
         return
 
-    text = update.message.text
+    if update.message.voice:
+        voice = update.message.voice
+        tg_file = await context.bot.get_file(voice.file_id)
+
+        with tempfile.NamedTemporaryFile(suffix=".ogg") as temp_file:
+            await tg_file.download_to_drive(temp_file.name)
+
+            with open(temp_file.name, "rb") as f:
+                response = requests.post(STT_API_URL, files={"file": f})
+
+            if response.status_code == 200:
+                result = response.json()
+                text = result["transcription"]
+                await update.message.reply_text(f"Sizning habaringiz:\n{text}")
+            else:
+                await update.message.reply_text(
+                    f"❌ Ovozni matnga o'girishda xatolik yuzaga keldi"
+                )
+                temp_file.close()
+                return
+    else:
+        text = update.message.text
+
     chat.add_user_message(text)
 
     client = get_client()

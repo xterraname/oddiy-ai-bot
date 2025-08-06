@@ -9,7 +9,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user: User = context.user_db
 
     msg = (
-        f"Salom, {user.first_name}! Botga xush kelibsiz. Menga biror savolingiz bormi?"
+        f"Salom, {user.first_name}! Botga xush kelibsiz. Menga biror savolingiz bormi? (matn yoki ovozli habar shaklida jo'nating!)"
     )
 
     await update.message.reply_text(msg)
