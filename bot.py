@@ -1,3 +1,4 @@
+import subprocess
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -14,12 +15,15 @@ from handlers.chat import chat
 
 
 def main():
-    print("Bot ishga tushmoqda...")
+    print("The bot is starting....")
 
-    # DB init
+    # 1. STT API
+    subprocess.Popen(["python", "stt/main.py"])
+
+    # 2. DB init
     init_db()
 
-    # Bot application
+    # 3. Bot application
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     # Commands
@@ -27,10 +31,10 @@ def main():
     app.add_handler(CommandHandler("newchat", new_chat))
     
     # Handlers
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
+    app.add_handler(MessageHandler((filters.TEXT | filters.VOICE) & ~filters.COMMAND, chat))
 
     # Run bot
-    print("Bot ishlayapti...")
+    print("The bot is working....")
     app.run_polling()
 
 

@@ -69,3 +69,5 @@ Ushbu model tanlanganimning sabablari:
 ![Chat 1](./images/img1.png) 
 
 ![Chat 2](./images/img2.png)
+
+![Chat 3](./images/img3.png)
